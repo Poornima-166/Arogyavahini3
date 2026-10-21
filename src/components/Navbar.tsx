@@ -8,9 +8,16 @@ import { Sun, Moon, Globe, ShieldAlert, Menu, X, ArrowUpRight } from 'lucide-rea
 interface NavbarProps {
   onOpenAuth: (role?: UserRole) => void;
   onSelectPortalSection: () => void;
+  currentUser?: any;
+  onLogout?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onSelectPortalSection }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  onOpenAuth,
+  onSelectPortalSection,
+  currentUser,
+  onLogout,
+}) => {
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, currentLanguage, t } = useLanguage();
   const [langMenuOpen, setLangMenuOpen] = useState(false);
@@ -133,15 +140,32 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenAuth, onSelectPortalSectio
               {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
             </button>
 
-            {/* Primary Action Button */}
-            <button
-              type="button"
-              onClick={() => onOpenAuth()}
-              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-md shadow-sm transition-all whitespace-nowrap shrink-0 focus-visible:ring-2 focus-visible:ring-red-500"
-            >
-              <span>{t('signIn', 'Sign In')} / {t('accessPortals', 'Access Portals')}</span>
-              <ArrowUpRight className="w-3.5 h-3.5 opacity-80" />
-            </button>
+            {/* Primary Action Button or Logged In User Badge */}
+            {currentUser ? (
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span className="truncate max-w-[120px]">{currentUser.full_name || currentUser.fullName}</span>
+                  <span className="font-mono text-[10px] text-slate-400 uppercase">({currentUser.role})</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-md border border-red-200 dark:border-red-900 transition-colors whitespace-nowrap cursor-pointer"
+                >
+                  {t('signOut', 'Sign Out')}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onOpenAuth()}
+                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-md shadow-sm transition-all whitespace-nowrap shrink-0 focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer"
+              >
+                <span>{t('signIn', 'Sign In')} / {t('accessPortals', 'Access Portals')}</span>
+                <ArrowUpRight className="w-3.5 h-3.5 opacity-80" />
+              </button>
+            )}
 
             {/* Mobile Menu Toggle Button */}
             <button

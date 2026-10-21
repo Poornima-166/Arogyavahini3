@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { UserRole } from '../types/auth';
+import { api } from '../services/api';
 import { X, User, Truck, Building2, SlidersHorizontal, Eye, EyeOff, ShieldCheck, AlertCircle, Lock } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialRole?: UserRole;
+  onAuthSuccess?: (user: any) => void;
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialRole = 'patient' }) => {
+export const AuthModal: React.FC<AuthModalProps> = ({
+  isOpen,
+  onClose,
+  initialRole = 'patient',
+  onAuthSuccess,
+}) => {
   const { t } = useLanguage();
   const [mode, setMode] = useState<'signin' | 'register'>('signin');
   const [selectedRole, setSelectedRole] = useState<UserRole>(initialRole);
@@ -37,7 +44,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialRo
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError(null);
 
@@ -70,11 +77,49 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialRo
       return;
     }
 
-    // Honest feedback notice adhering to rule:
-    // "Do not create fake authentication, fake live tracking or simulated successful emergency submissions"
-    setSubmittedMessage(
-      `Frontend inputs validated for role: ${selectedRole.toUpperCase()}. Stage 2 PostgreSQL backend will verify credentials via /api/v1/auth/${mode === 'signin' ? 'login' : 'register'}. No deceptive mock session was set.`
-    );
+    try {
+      if (mode === 'signin') {
+        const res = await api.auth.login({
+          identifier,
+          password,
+          role: selectedRole,
+        });
+        if (res.success) {
+          setSubmittedMessage(res.message);
+          if (onAuthSuccess) onAuthSuccess(res.user);
+          setTimeout(() => {
+            onClose();
+          }, 1200);
+        }
+      } else {
+        const res = await api.auth.register({
+          email: identifier.includes('@') ? identifier : undefined,
+          phone: !identifier.includes('@') ? identifier : undefined,
+          password,
+          role: selectedRole,
+          fullName,
+          nationalHealthId: abhaId,
+          vehicleReg,
+          badgeId,
+          hospitalId: hospitalCode,
+          department,
+        });
+        if (res.success) {
+          setSubmittedMessage(res.message);
+          if (onAuthSuccess) onAuthSuccess(res.user);
+          setTimeout(() => {
+            onClose();
+          }, 1200);
+        }
+      }
+    } catch (err: any) {
+      const errMsg = err.message || 'Authentication request failed';
+      if (mode === 'signin' && (errMsg.toLowerCase().includes('invalid') || errMsg.toLowerCase().includes('not found') || errMsg.toLowerCase().includes('failed'))) {
+        setValidationError(`${errMsg} If you don't have an account yet, switch to the "Register" tab above to create one, or use the Demo Account button.`);
+      } else {
+        setValidationError(errMsg);
+      }
+    }
   };
 
   return (
@@ -145,7 +190,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialRo
           </div>
 
           {/* Role Selector Grid */}
-          <div className="mb-6">
+          <div className="mb-4">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               {t('authRoleSelect', 'Select Your Access Portal')}
             </label>
@@ -156,6 +201,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialRo
                 onClick={() => {
                   setSelectedRole('patient');
                   setSubmittedMessage(null);
+                  setValidationError(null);
                 }}
                 className={`p-2.5 rounded-lg border text-left flex items-center gap-2 transition-all cursor-pointer ${
                   selectedRole === 'patient'
@@ -172,6 +218,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialRo
                 onClick={() => {
                   setSelectedRole('driver');
                   setSubmittedMessage(null);
+                  setValidationError(null);
                 }}
                 className={`p-2.5 rounded-lg border text-left flex items-center gap-2 transition-all cursor-pointer ${
                   selectedRole === 'driver'
@@ -188,6 +235,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialRo
                 onClick={() => {
                   setSelectedRole('hospital');
                   setSubmittedMessage(null);
+                  setValidationError(null);
                 }}
                 className={`p-2.5 rounded-lg border text-left flex items-center gap-2 transition-all cursor-pointer ${
                   selectedRole === 'hospital'
@@ -204,6 +252,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialRo
                 onClick={() => {
                   setSelectedRole('admin');
                   setSubmittedMessage(null);
+                  setValidationError(null);
                 }}
                 className={`p-2.5 rounded-lg border text-left flex items-center gap-2 transition-all cursor-pointer ${
                   selectedRole === 'admin'
@@ -217,6 +266,38 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialRo
 
             </div>
           </div>
+
+          {/* Quick Demo Credentials Helper */}
+          {mode === 'signin' && (
+            <div className="mb-4 p-2.5 rounded-lg bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-900/40 text-xs flex items-center justify-between">
+              <div className="text-[11px] text-blue-800 dark:text-blue-300">
+                <span className="font-semibold">Demo Account:</span>{' '}
+                {selectedRole === 'patient' && 'citizen@arogya.in'}
+                {selectedRole === 'driver' && 'driver@arogya.in'}
+                {selectedRole === 'hospital' && 'er@victoria.gov.in'}
+                {selectedRole === 'admin' && 'admin@trafficpolice.gov.in'}
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (selectedRole === 'patient') {
+                    setIdentifier('citizen@arogya.in');
+                  } else if (selectedRole === 'driver') {
+                    setIdentifier('driver@arogya.in');
+                  } else if (selectedRole === 'hospital') {
+                    setIdentifier('er@victoria.gov.in');
+                  } else if (selectedRole === 'admin') {
+                    setIdentifier('admin@trafficpolice.gov.in');
+                  }
+                  setPassword('Arogya@2026');
+                  setValidationError(null);
+                }}
+                className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium text-[11px] transition-colors cursor-pointer"
+              >
+                Auto-fill
+              </button>
+            </div>
+          )}
 
           {/* Validation Notice or Feedback */}
           {validationError && (
