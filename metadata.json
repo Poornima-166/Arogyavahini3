@@ -2,6 +2,7 @@
   "name": "ArogyaVahini — Smart Ambulance Routing & Hospital Coordination",
   "description": "AI-based smart ambulance routing with traffic signal priority, green corridor synchronization, emergency SOS dispatch, and multi-portal hospital trauma coordination.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
-

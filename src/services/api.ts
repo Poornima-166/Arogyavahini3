@@ -6,7 +6,14 @@
 
 import { UserRole } from '../types/auth';
 
-const BASE_API_URL = '/api/v1';
+// Base API URL configuration:
+// If deployed on Vercel with an external backend (e.g., Render), VITE_API_BASE_URL can be set.
+// Defaults to relative path so it seamlessly works with local dev, Docker, Render, and Vercel serverless.
+const RAW_BASE_URL = typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL
+  ? String(import.meta.env.VITE_API_BASE_URL).replace(/\/$/, '')
+  : '';
+
+const BASE_API_URL = `${RAW_BASE_URL}/api/v1`;
 
 let authToken: string | null = typeof window !== 'undefined' ? localStorage.getItem('arogya_auth_token') : null;
 
@@ -35,23 +42,50 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
     headers['Authorization'] = `Bearer ${authToken}`;
   }
 
-  const res = await fetch(url, {
-    headers,
-    ...options,
-  });
-
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || `HTTP ${res.status}: Failed to perform operation`);
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      headers,
+      ...options,
+    });
+  } catch (networkErr: any) {
+    throw new Error(`Cannot reach backend server (${networkErr.message || 'Network connection failed'}). Please ensure the server is active.`);
   }
-  return data;
+
+  const contentType = res.headers.get('content-type') || '';
+  let data: any = null;
+
+  if (contentType.includes('application/json')) {
+    try {
+      data = await res.json();
+    } catch {
+      data = null;
+    }
+  } else {
+    // Non-JSON response (e.g. static CDN or Vercel 404 HTML page)
+    const textBody = await res.text();
+    if (!res.ok) {
+      if (res.status === 404) {
+        throw new Error(
+          `Backend route not found (HTTP 404). If deployed on Vercel, redeploy with the latest serverless configuration or point VITE_API_BASE_URL to your Render backend.`
+        );
+      }
+      throw new Error(`Server returned HTTP ${res.status}: ${textBody.slice(0, 100)}`);
+    }
+    data = { message: textBody };
+  }
+
+  if (!res.ok) {
+    throw new Error(data?.error || data?.message || `HTTP ${res.status}: Failed to perform operation`);
+  }
+  return data as T;
 }
 
 export const api = {
   // Health
   health: {
-    live: async () => fetchJson<{ status: string; uptime: number }>('/health/live'),
-    ready: async () => fetchJson<{ status: string; database: any }>('/health/ready'),
+    live: async () => fetchJson<{ status: string; uptime: number }>(`${RAW_BASE_URL}/health/live`),
+    ready: async () => fetchJson<{ status: string; database: any }>(`${RAW_BASE_URL}/health/ready`),
   },
 
   // Authentication & User Management (Module 1)
