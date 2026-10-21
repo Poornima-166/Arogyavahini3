@@ -52,6 +52,31 @@ function MainApp() {
     setCurrentUser(null);
   };
 
+  const handleInstantSwitchAuth = async (role: UserRole) => {
+    let id = 'citizen@arogya.in';
+    if (role === 'driver') id = 'driver@arogya.in';
+    if (role === 'hospital') id = 'er@victoria.gov.in';
+    if (role === 'admin') id = 'admin@trafficpolice.gov.in';
+
+    try {
+      const res = await api.auth.login({
+        identifier: id,
+        password: 'Arogya@2026',
+        role,
+      });
+      if (res.success && res.user) {
+        setCurrentUser(res.user);
+      }
+    } catch {
+      // Fallback: switch view even if offline
+    }
+    setActiveWorkspaceRole(role);
+    const el = document.getElementById('live-portals');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const handleSelectRoleAndScroll = (role: UserRole) => {
     setActiveWorkspaceRole(role);
     const el = document.getElementById('live-portals');
@@ -68,11 +93,13 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-black text-slate-900 dark:text-white transition-colors duration-200 selection:bg-red-600 selection:text-white">
       {/* Top Bar Navigation */}
       <Navbar
-        onOpenAuth={() => handleOpenAuth('patient')}
-        onSelectPortalSection={() => handleSelectRoleAndScroll('patient')}
+        onOpenAuth={(role) => handleOpenAuth(role || 'patient')}
+        onSelectPortalSection={(role) => handleSelectRoleAndScroll(role || 'patient')}
+        onQuickSwitchRole={(role) => handleInstantSwitchAuth(role)}
+        activeRole={activeWorkspaceRole}
         currentUser={currentUser}
         onLogout={handleLogout}
       />
@@ -92,7 +119,9 @@ function MainApp() {
           <PortalWorkspaceContainer
             currentRole={activeWorkspaceRole}
             onRoleChange={(newRole) => setActiveWorkspaceRole(newRole)}
+            onQuickSwitchRole={(role) => handleInstantSwitchAuth(role)}
             onOpenAuth={(role) => handleOpenAuth(role)}
+            currentUser={currentUser}
           />
         </div>
 

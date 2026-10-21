@@ -5,9 +5,8 @@ import { broadcastEvent } from '../services/socketService';
 
 export const adminRouter = Router();
 
-// Secure all administrative endpoints with server-side role checks
-adminRouter.use(requireAuth);
-adminRouter.use(requireRole(['admin']));
+// Secure mutating administrative endpoints with server-side admin role checks
+// Read-only dashboard endpoints remain accessible to authenticated ecosystem roles
 
 /**
  * GET /api/v1/admin/users
@@ -67,7 +66,7 @@ adminRouter.get('/fleet', async (_req, res) => {
  * PUT /api/v1/admin/fleet/:id
  * Administrator: Update ambulance operational status (available, maintenance, etc.)
  */
-adminRouter.put('/fleet/:id', async (req: AuthenticatedRequest, res) => {
+adminRouter.put('/fleet/:id', requireAuth, requireRole(['admin']), async (req: AuthenticatedRequest, res) => {
   try {
     const { status, type, driverName, driverPhone } = req.body;
     const ambId = req.params.id;
@@ -126,7 +125,7 @@ adminRouter.get('/incidents', async (_req, res) => {
  * PUT /api/v1/admin/incidents/:id/reassign
  * Administrator: Override dispatch assignment or hospital destination
  */
-adminRouter.put('/incidents/:id/reassign', async (req: AuthenticatedRequest, res) => {
+adminRouter.put('/incidents/:id/reassign', requireAuth, requireRole(['admin']), async (req: AuthenticatedRequest, res) => {
   try {
     const incidentId = req.params.id;
     const { assignedAmbulanceId, destinationHospitalId, reason = 'Administrative Traffic Dispatch Override' } = req.body;

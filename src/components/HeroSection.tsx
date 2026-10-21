@@ -14,30 +14,30 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const { t } = useLanguage();
 
   return (
-    <section id="overview" className="relative pt-12 pb-16 md:pt-20 md:pb-24 overflow-hidden">
+    <section id="overview" className="relative pt-12 pb-16 md:pt-20 md:pb-24 overflow-hidden bg-white dark:bg-black transition-colors">
       {/* Background ambient medical glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-red-500/5 dark:bg-red-500/10 blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-red-500/8 dark:bg-red-600/15 blur-[140px] rounded-full pointer-events-none -z-10" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Top Emergency Advisory Bar (National Helpline) */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 mb-8 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-xs">
-          <div className="flex items-center gap-2.5 text-red-900 dark:text-red-200 font-medium">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-600 shrink-0" />
+        <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 mb-8 rounded-xl bg-white dark:bg-zinc-950 border border-red-200 dark:border-red-950/70 text-xs shadow-sm dark:shadow-[0_0_20px_rgba(220,38,38,0.12)]">
+          <div className="flex items-center gap-2.5 text-slate-900 dark:text-zinc-200 font-semibold">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-600 shrink-0 animate-ping" />
             <span>National Emergency Medical Response Dispatch — Free 24/7 Helpline</span>
           </div>
           <div className="flex items-center gap-3">
             <a
               href="tel:108"
-              className="inline-flex items-center gap-1.5 font-bold font-mono text-red-700 dark:text-red-300 hover:text-red-900 dark:hover:text-red-100 transition-colors"
+              className="inline-flex items-center gap-1.5 font-bold font-mono text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
             >
               <PhoneCall className="w-3.5 h-3.5" />
               <span>DIAL 108 (Ambulance)</span>
             </a>
-            <span className="text-red-300 dark:text-red-700">·</span>
+            <span className="text-red-300 dark:text-red-900">·</span>
             <a
               href="tel:112"
-              className="inline-flex items-center gap-1.5 font-bold font-mono text-red-700 dark:text-red-300 hover:text-red-900 dark:hover:text-red-100 transition-colors"
+              className="inline-flex items-center gap-1.5 font-bold font-mono text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
             >
               <span>DIAL 112 (Universal)</span>
             </a>
@@ -54,14 +54,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-red-600 dark:text-red-400 mb-3">
               <span>{t('heroBadge', 'Emergency Healthcare Transit Network')}</span>
               <span aria-hidden="true">·</span>
-              <span className="text-slate-500 dark:text-slate-400">Golden Hour Protection</span>
+              <span className="text-slate-500 dark:text-zinc-400">Golden Hour Protection</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[2.85rem] font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.15] text-balance mb-5">
               {t('heroTitle', 'Every Second Preserves Life: Smart Corridors for Emergency Transit')}
             </h1>
 
-            <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed mb-8 max-w-2xl">
+            <p className="text-base sm:text-lg text-slate-600 dark:text-zinc-300 leading-relaxed mb-8 max-w-2xl">
               {t(
                 'heroDescription',
                 'ArogyaVahini interconnects ambulances, municipal traffic signals, and hospital trauma centers through AI routing and automated green light preemption to safeguard the Golden Hour.'
@@ -73,7 +73,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <button
                 type="button"
                 onClick={onExplorePortals}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg shadow-sm transition-all focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-xl shadow-md transition-all focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer glow-red"
               >
                 <span>{t('heroPrimaryCta', 'Explore 4 Portals')}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -82,21 +82,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <button
                 type="button"
                 onClick={onExploreSimulator}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-slate-400 cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-bold text-slate-800 dark:text-zinc-100 bg-white dark:bg-zinc-950 hover:bg-slate-50 dark:hover:bg-zinc-900 border border-slate-300 dark:border-red-950/70 rounded-xl transition-all focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer"
               >
-                <Cpu className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <Cpu className="w-4 h-4 text-red-600 dark:text-red-400" />
                 <span>{t('heroSecondaryCta', 'Simulate Green Wave')}</span>
               </button>
             </div>
 
             {/* Trust Markers / Institutional Protocol Checklist */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-6 border-t border-slate-200 dark:border-slate-800 w-full text-xs text-slate-600 dark:text-slate-400">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-6 border-t border-slate-200 dark:border-red-950/60 w-full text-xs text-slate-600 dark:text-zinc-400">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
                 <span>Good Samaritan Law Compliant</span>
               </div>
               <div className="flex items-center gap-2">
-                <Navigation2 className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                <Navigation2 className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
                 <span>400m IoT Signal Preemption</span>
               </div>
               <div className="flex items-center gap-2 col-span-2 sm:col-span-1">
@@ -108,17 +108,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
           {/* Right Column: High-Fidelity Tactical Telemetry & Green Wave HUD */}
           <div className="lg:col-span-5 w-full">
-            <div className="relative rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-6 overflow-hidden">
+            <div className="relative rounded-2xl border border-slate-200 dark:border-red-950/80 bg-white dark:bg-zinc-950 shadow-xl dark:shadow-[0_0_40px_rgba(220,38,38,0.15)] p-6 overflow-hidden">
               
               {/* Header of HUD */}
-              <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 dark:border-red-950/50">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse glow-red" />
                   <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
                     Active Green Corridor Transit
                   </span>
                 </div>
-                <span className="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded">
+                <span className="font-mono text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/60 px-2.5 py-0.5 rounded-md border border-red-200 dark:border-red-900/60">
                   PRIORITY: ESI-1 CRITICAL
                 </span>
               </div>

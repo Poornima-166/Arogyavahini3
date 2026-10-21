@@ -44,6 +44,35 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleInstantLogin = async (role: UserRole) => {
+    setSelectedRole(role);
+    setValidationError(null);
+    let id = 'citizen@arogya.in';
+    if (role === 'driver') id = 'driver@arogya.in';
+    if (role === 'hospital') id = 'er@victoria.gov.in';
+    if (role === 'admin') id = 'admin@trafficpolice.gov.in';
+
+    setIdentifier(id);
+    setPassword('Arogya@2026');
+
+    try {
+      const res = await api.auth.login({
+        identifier: id,
+        password: 'Arogya@2026',
+        role,
+      });
+      if (res.success) {
+        setSubmittedMessage(`Authenticated successfully as ${res.user?.full_name || role.toUpperCase()}`);
+        if (onAuthSuccess) onAuthSuccess(res.user);
+        setTimeout(() => {
+          onClose();
+        }, 800);
+      }
+    } catch (err: any) {
+      setValidationError(err.message || 'Instant login failed');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError(null);
@@ -99,9 +128,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           role: selectedRole,
           fullName,
           nationalHealthId: abhaId,
-          vehicleReg,
-          badgeId,
-          hospitalId: hospitalCode,
+          vehicleReg: vehicleReg || 'KA-04-E-1082',
+          badgeId: badgeId || 'EMT-88392',
+          licenseNumber: badgeId || vehicleReg || 'KA-DL-2026',
+          hospitalId: hospitalCode || 'HOSP-VIC-01',
+          facilityCode: hospitalCode || 'VIC-BLR-01',
           department,
         });
         if (res.success) {
@@ -115,7 +146,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } catch (err: any) {
       const errMsg = err.message || 'Authentication request failed';
       if (mode === 'signin' && (errMsg.toLowerCase().includes('invalid') || errMsg.toLowerCase().includes('not found') || errMsg.toLowerCase().includes('failed'))) {
-        setValidationError(`${errMsg} If you don't have an account yet, switch to the "Register" tab above to create one, or use the Demo Account button.`);
+        setValidationError(`${errMsg} Switch role above or click one of the instant role login buttons below.`);
       } else {
         setValidationError(errMsg);
       }
@@ -267,35 +298,77 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           </div>
 
-          {/* Quick Demo Credentials Helper */}
+          {/* Instant 1-Click Role Login Bar */}
           {mode === 'signin' && (
-            <div className="mb-4 p-2.5 rounded-lg bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-900/40 text-xs flex items-center justify-between">
-              <div className="text-[11px] text-blue-800 dark:text-blue-300">
-                <span className="font-semibold">Demo Account:</span>{' '}
-                {selectedRole === 'patient' && 'citizen@arogya.in'}
-                {selectedRole === 'driver' && 'driver@arogya.in'}
-                {selectedRole === 'hospital' && 'er@victoria.gov.in'}
-                {selectedRole === 'admin' && 'admin@trafficpolice.gov.in'}
+            <div className="mb-5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Instant Access (Demo Credentials)
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedRole === 'patient') setIdentifier('citizen@arogya.in');
+                    if (selectedRole === 'driver') setIdentifier('driver@arogya.in');
+                    if (selectedRole === 'hospital') setIdentifier('er@victoria.gov.in');
+                    if (selectedRole === 'admin') setIdentifier('admin@trafficpolice.gov.in');
+                    setPassword('Arogya@2026');
+                    setValidationError(null);
+                  }}
+                  className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                >
+                  Fill Form Only
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  if (selectedRole === 'patient') {
-                    setIdentifier('citizen@arogya.in');
-                  } else if (selectedRole === 'driver') {
-                    setIdentifier('driver@arogya.in');
-                  } else if (selectedRole === 'hospital') {
-                    setIdentifier('er@victoria.gov.in');
-                  } else if (selectedRole === 'admin') {
-                    setIdentifier('admin@trafficpolice.gov.in');
-                  }
-                  setPassword('Arogya@2026');
-                  setValidationError(null);
-                }}
-                className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium text-[11px] transition-colors cursor-pointer"
-              >
-                Auto-fill
-              </button>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => handleInstantLogin('driver')}
+                  className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center justify-between shadow-sm cursor-pointer transition-colors"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Truck className="w-3.5 h-3.5 shrink-0" />
+                    <span>Driver HUD</span>
+                  </span>
+                  <span className="text-[10px] opacity-80 font-mono">1-Click</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleInstantLogin('hospital')}
+                  className="p-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium flex items-center justify-between shadow-sm cursor-pointer transition-colors"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5 shrink-0" />
+                    <span>Hospital ER</span>
+                  </span>
+                  <span className="text-[10px] opacity-80 font-mono">1-Click</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleInstantLogin('admin')}
+                  className="p-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-medium flex items-center justify-between shadow-sm cursor-pointer transition-colors"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <SlidersHorizontal className="w-3.5 h-3.5 shrink-0" />
+                    <span>Traffic Admin</span>
+                  </span>
+                  <span className="text-[10px] opacity-80 font-mono">1-Click</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleInstantLogin('patient')}
+                  className="p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium flex items-center justify-between shadow-sm cursor-pointer transition-colors"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 shrink-0" />
+                    <span>Citizen Patient</span>
+                  </span>
+                  <span className="text-[10px] opacity-80 font-mono">1-Click</span>
+                </button>
+              </div>
             </div>
           )}
 

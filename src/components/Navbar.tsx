@@ -7,7 +7,9 @@ import { Sun, Moon, Globe, ShieldAlert, Menu, X, ArrowUpRight } from 'lucide-rea
 
 interface NavbarProps {
   onOpenAuth: (role?: UserRole) => void;
-  onSelectPortalSection: () => void;
+  onSelectPortalSection: (role?: UserRole) => void;
+  onQuickSwitchRole?: (role: UserRole) => void;
+  activeRole?: UserRole;
   currentUser?: any;
   onLogout?: () => void;
 }
@@ -15,84 +17,139 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenAuth,
   onSelectPortalSection,
+  onQuickSwitchRole,
+  activeRole = 'patient',
   currentUser,
   onLogout,
 }) => {
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, currentLanguage, t } = useLanguage();
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const handleRoleClick = (role: UserRole) => {
+    if (onQuickSwitchRole) {
+      onQuickSwitchRole(role);
+    } else {
+      onSelectPortalSection(role);
+    }
+    setRoleMenuOpen(false);
+  };
+
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-red-100 dark:border-red-950/60 shadow-sm transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
           
-          {/* Zone 1: Brand Wordmark (Single Text Element Wordmark) */}
+          {/* Zone 1: Brand Wordmark */}
           <a
             href="#"
             className="flex items-center gap-2.5 text-slate-900 dark:text-white font-bold text-xl tracking-tight whitespace-nowrap shrink-0 group focus:outline-none"
           >
-            <span className="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center font-black text-lg shadow-sm group-hover:bg-red-700 transition-colors">
+            <span className="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center font-black text-lg shadow-sm group-hover:bg-red-700 transition-colors glow-red">
               <ShieldAlert className="w-5 h-5 text-white" />
             </span>
             <span className="font-extrabold tracking-tight">
-              Arogya<span className="text-red-600 dark:text-red-500">Vahini</span>
+              Arogya<span className="text-red-600 dark:text-red-500 glow-red-text">Vahini</span>
             </span>
           </a>
 
-          {/* Zone 2: Navigation Links (Single-Line, 4-5 links) */}
-          <nav className="hidden lg:flex items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-300">
+          {/* Zone 2: Navigation Links & Prominent Portals Bar */}
+          <nav className="hidden lg:flex items-center gap-5 text-sm font-medium text-slate-600 dark:text-zinc-300">
             <a
               href="#overview"
               className="hover:text-red-600 dark:hover:text-red-400 transition-colors whitespace-nowrap shrink-0"
             >
               {t('navOverview', 'Overview')}
             </a>
-            <a
-              href="#portals"
-              onClick={onSelectPortalSection}
-              className="hover:text-red-600 dark:hover:text-red-400 transition-colors whitespace-nowrap shrink-0"
-            >
-              {t('navPortals', 'Four Portals')}
-            </a>
+
+            {/* Modern 4-Portals Segmented Switcher in Navbar */}
+            <div className="flex items-center p-1 bg-slate-100 dark:bg-zinc-900/90 rounded-xl border border-slate-200/80 dark:border-red-950/50 text-xs shadow-inner">
+              <button
+                type="button"
+                onClick={() => handleRoleClick('patient')}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                  activeRole === 'patient'
+                    ? 'bg-red-600 text-white shadow-sm glow-red'
+                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Citizen Emergency SOS Portal"
+              >
+                <span>🚨 Citizen</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleRoleClick('driver')}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                  activeRole === 'driver'
+                    ? 'bg-red-600 text-white shadow-sm glow-red'
+                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Ambulance Paramedic HUD Portal"
+              >
+                <span>🚑 Driver HUD</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleRoleClick('hospital')}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                  activeRole === 'hospital'
+                    ? 'bg-red-600 text-white shadow-sm glow-red'
+                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Hospital Trauma ER Portal"
+              >
+                <span>🏥 Hospital ER</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleRoleClick('admin')}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                  activeRole === 'admin'
+                    ? 'bg-red-600 text-white shadow-sm glow-red'
+                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="City Traffic & Police Admin Portal"
+              >
+                <span>🚦 Traffic Admin</span>
+              </button>
+            </div>
+
             <a
               href="#technology"
               className="hover:text-red-600 dark:hover:text-red-400 transition-colors whitespace-nowrap shrink-0"
             >
-              {t('navTech', 'AI & Signal Priority')}
+              {t('navTech', 'AI & Signals')}
             </a>
             <a
               href="#simulator"
               className="hover:text-red-600 dark:hover:text-red-400 transition-colors whitespace-nowrap shrink-0"
             >
-              {t('navSimulator', 'Corridor Simulator')}
+              {t('navSimulator', 'Corridor Sim')}
             </a>
             <a
               href="#guide"
               className="hover:text-red-600 dark:hover:text-red-400 transition-colors whitespace-nowrap shrink-0"
             >
-              {t('navGuide', 'Emergency Protocols')}
-            </a>
-            <a
-              href="#architecture"
-              className="hover:text-red-600 dark:hover:text-red-400 transition-colors whitespace-nowrap shrink-0 text-slate-400 dark:text-slate-500"
-            >
-              Schema
+              {t('navGuide', 'Protocols')}
             </a>
           </nav>
 
-          {/* Zone 3: Actions (Language, Theme, 1 Primary Action) */}
-          <div className="flex items-center gap-2.5 shrink-0">
+          {/* Zone 3: Actions (Language, Theme, Role Switcher / Auth) */}
+          <div className="flex items-center gap-2 shrink-0">
             {/* Language Selector */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setLangMenuOpen(!langMenuOpen)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-colors whitespace-nowrap shrink-0 focus-visible:ring-2 focus-visible:ring-red-500"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-zinc-200 bg-slate-100 dark:bg-zinc-900 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded-lg border border-transparent dark:border-zinc-800 transition-colors whitespace-nowrap shrink-0 focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer"
                 aria-label="Select Language"
               >
-                <Globe className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                <Globe className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
                 <span className="hidden sm:inline">{currentLanguage.nativeLabel}</span>
                 <span className="sm:hidden font-mono uppercase text-[11px]">{language}</span>
               </button>
@@ -103,8 +160,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     className="fixed inset-0 z-20"
                     onClick={() => setLangMenuOpen(false)}
                   />
-                  <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-800 py-1.5 z-30">
-                    <div className="px-3 py-1 text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                  <div className="absolute right-0 mt-2 w-44 bg-white dark:bg-zinc-950 rounded-xl shadow-xl border border-red-100 dark:border-red-950/70 py-1.5 z-30">
+                    <div className="px-3 py-1 text-[11px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
                       Select Language
                     </div>
                     {SUPPORTED_LANGUAGES.map((lang) => (
@@ -114,10 +171,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                           setLanguage(lang.code);
                           setLangMenuOpen(false);
                         }}
-                        className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between transition-colors ${
+                        className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between transition-colors cursor-pointer ${
                           language === lang.code
-                            ? 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 font-semibold'
-                            : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                            ? 'bg-red-50 text-red-700 dark:bg-red-950/60 dark:text-red-400 font-semibold'
+                            : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-900'
                         }`}
                       >
                         <span>{lang.nativeLabel}</span>
@@ -129,52 +186,63 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
-            {/* Theme Toggle */}
+            {/* Theme Toggle (Modern Black & Red / White & Red) */}
             <button
               type="button"
               onClick={toggleTheme}
-              className="p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-red-500"
+              className="p-2 text-slate-700 dark:text-zinc-200 hover:text-red-600 dark:hover:text-red-400 bg-slate-100 dark:bg-zinc-900 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded-lg border border-transparent dark:border-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer"
               aria-label={theme === 'dark' ? t('lightMode', 'Light Mode') : t('darkMode', 'Dark Mode')}
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={theme === 'dark' ? 'Switch to light mode (White & Red)' : 'Switch to dark mode (Black & Red)'}
             >
-              {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+              {theme === 'dark' ? <Sun className="w-4 h-4 text-red-400" /> : <Moon className="w-4 h-4 text-red-600" />}
             </button>
 
             {/* Primary Action Button or Logged In User Badge */}
             {currentUser ? (
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span className="truncate max-w-[120px]">{currentUser.full_name || currentUser.fullName}</span>
-                  <span className="font-mono text-[10px] text-slate-400 uppercase">({currentUser.role})</span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-800">
+                  <span className="w-2 h-2 rounded-full bg-red-600 dark:bg-red-500 animate-pulse" />
+                  <span className="truncate max-w-[110px]">{currentUser.full_name || currentUser.fullName}</span>
+                  <span className="font-mono text-[10px] text-red-600 dark:text-red-400 uppercase font-bold">({currentUser.role})</span>
                 </span>
+                
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth(activeRole)}
+                  className="px-2.5 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 rounded-lg border border-red-200 dark:border-red-900/60 transition-colors whitespace-nowrap cursor-pointer"
+                  title="Switch between Citizen, Driver, Hospital, or Admin badges"
+                >
+                  Switch Role / Badge
+                </button>
                 <button
                   type="button"
                   onClick={onLogout}
-                  className="px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-md border border-red-200 dark:border-red-900 transition-colors whitespace-nowrap cursor-pointer"
+                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 dark:text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg border border-slate-200 dark:border-zinc-800 transition-colors whitespace-nowrap cursor-pointer"
                 >
                   {t('signOut', 'Sign Out')}
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={() => onOpenAuth()}
-                className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-md shadow-sm transition-all whitespace-nowrap shrink-0 focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer"
-              >
-                <span>{t('signIn', 'Sign In')} / {t('accessPortals', 'Access Portals')}</span>
-                <ArrowUpRight className="w-3.5 h-3.5 opacity-80" />
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth(activeRole)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg shadow-sm transition-all whitespace-nowrap shrink-0 focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer glow-red"
+                >
+                  <span>{t('signIn', 'Sign In')} / {t('accessPortals', 'Access Portals')}</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 opacity-90" />
+                </button>
+              </div>
             )}
 
             {/* Mobile Menu Toggle Button */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md"
+              className="lg:hidden p-2 text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-900 rounded-lg cursor-pointer"
               aria-label="Toggle navigation menu"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-5 h-5 text-red-600" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>

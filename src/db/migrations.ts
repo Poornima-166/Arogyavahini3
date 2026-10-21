@@ -393,5 +393,82 @@ async function seedInitialData() {
     }
   }
 
-  console.log('[Database] Seed initialization complete.');
+  // 2. Real PostgreSQL Database Seeding (Executes when live PostgreSQL pool is active)
+  try {
+    for (const u of seedUsers) {
+      await query(
+        `INSERT INTO users (id, email, phone, password_hash, role, full_name)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         ON CONFLICT (email) DO UPDATE 
+         SET password_hash = EXCLUDED.password_hash, role = EXCLUDED.role, full_name = EXCLUDED.full_name`,
+        [u.id, u.email, u.phone, u.password_hash, u.role, u.full_name]
+      );
+    }
+
+    // Seed Patient Profile
+    await query(
+      `INSERT INTO patient_profiles (user_id, national_health_id, blood_group, allergies, medical_conditions, emergency_contacts)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (user_id) DO NOTHING`,
+      [
+        seedUsers[0].id,
+        '91-4821-9920-1082',
+        'O+',
+        'Penicillin, Sulfa drugs',
+        'Hypertension (Controlled)',
+        JSON.stringify([
+          { name: 'Kavitha Gowda (Spouse)', phone: '+91 98450 99887', relation: 'Spouse' },
+          { name: 'Dr. H. Prasad (Primary Care)', phone: '+91 80 2650 4433', relation: 'Doctor' },
+        ]),
+      ]
+    );
+
+    // Seed Driver Profile
+    await query(
+      `INSERT INTO driver_profiles (user_id, license_number, badge_id, vehicle_reg, is_available)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (user_id) DO NOTHING`,
+      [seedUsers[1].id, 'KA-DL-2018-00912', 'EMT-KA-8821', 'KA-04-E-1082', true]
+    );
+
+    // Seed Hospital Profile
+    await query(
+      `INSERT INTO hospital_staff_profiles (user_id, hospital_id, facility_code, department)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (user_id) DO NOTHING`,
+      [seedUsers[2].id, 'HOSP-VIC-01', 'VIC-BLR-01', 'Emergency & Trauma Department']
+    );
+
+    // Seed Admin Profile
+    await query(
+      `INSERT INTO admin_profiles (user_id, police_badge_id, department_jurisdiction)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (user_id) DO NOTHING`,
+      [seedUsers[3].id, 'TPD-BLR-SEC03', 'Bengaluru Traffic Police Command']
+    );
+
+    // Seed Hospitals Table
+    for (const h of seedHospitals) {
+      await query(
+        `INSERT INTO hospitals (id, name, address, emergency_phone, latitude, longitude, available_icu_beds, total_icu_beds, available_trauma_bays, total_trauma_bays, available_ventilators, total_ventilators, active_trauma_alerts)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+         ON CONFLICT (id) DO NOTHING`,
+        [h.id, h.name, h.address, h.emergency_phone, h.latitude, h.longitude, h.available_icu_beds, h.total_icu_beds, h.available_trauma_bays, h.total_trauma_bays, h.available_ventilators, h.total_ventilators, h.active_trauma_alerts]
+      );
+    }
+
+    // Seed Ambulances Table
+    for (const a of seedAmbulances) {
+      await query(
+        `INSERT INTO ambulances (id, registration_number, type, status, driver_name, driver_phone, latitude, longitude, speed_kmh, heading)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         ON CONFLICT (id) DO NOTHING`,
+        [a.id, a.registration_number, a.type, a.status, a.driver_name, a.driver_phone, a.latitude, a.longitude, a.speed_kmh, a.heading]
+      );
+    }
+  } catch (dbErr: any) {
+    console.warn('[PostgreSQL Seeding Warning]', dbErr.message);
+  }
+
+  console.log('[Database] Seed initialization complete across memory & PostgreSQL.');
 }
